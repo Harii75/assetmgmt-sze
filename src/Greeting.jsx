@@ -30,7 +30,7 @@ const Greeting = () => {
   const hour = currentTime.getHours();
   let greetingText = "Jó estét";
   if (hour < 6) {
-    greetingText = "Jó éjt";
+    greetingText = "Jó estét";
   } else if (hour < 12) {
     greetingText = "Jó reggelt";
   } else if (hour < 18) {
