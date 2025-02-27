@@ -1,10 +1,10 @@
 import React from "react";
-import { FiBarChart2, FiTrendingUp, FiPlusCircle } from "react-icons/fi"; // Icons
+import { FiBarChart2, FiTrendingUp } from "react-icons/fi";
+import { useNavigate } from "react-router-dom"; // Import navigation
 
 const StatCards = () => {
   return (
     <div className="flex flex-col items-center space-y-6 w-full px-6 my-10">
-
       {/* Responsive Stat Cards - Ensuring Full Width */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full">
         <StatCard title="Szoftverek" value="874db" change="+2.6%" color="text-green-500" bgColor="bg-gray-100" />
@@ -17,8 +17,16 @@ const StatCards = () => {
 };
 
 const StatCard = ({ title, value, change, color, bgColor }) => {
+  const navigate = useNavigate(); 
+
+  // Route meghatározása
+  const route = title === "Igények" ? "/igenyek" : "/eszkozok";
+
   return (
-    <div className={`p-10 rounded-lg shadow-md ${bgColor} flex justify-between items-center w-full`}>
+    <div
+      onClick={() => navigate(route)}
+      className={`p-10 rounded-lg shadow-md ${bgColor} flex justify-between items-center w-full cursor-pointer hover:bg-gray-200 transition`}
+    >
       <div>
         <h2 className="text-sm text-gray-600">{title}</h2>
         <p className="text-2xl font-bold text-gray-900">{value}</p>

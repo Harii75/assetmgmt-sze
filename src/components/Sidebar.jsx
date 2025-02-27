@@ -1,4 +1,5 @@
 import { AiOutlineClose } from "react-icons/ai";
+import { Link } from "react-router-dom";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   return (
@@ -7,47 +8,52 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         isOpen ? "translate-x-0" : "-translate-x-64"
       }`}
     >
-      {/* Bezárás gomb a fejléc jobb oldalán */}
-      <div className="flex items-center justify-between bg-gray-800 p-6.5">
+      {/* Sidebar Header with Close Button */}
+      <div className="flex items-center justify-between bg-gray-800 p-6">
         <span className="text-white font-semibold text-lg">Menü</span>
         <button onClick={toggleSidebar} className="text-blue-400 text-xl">
           <AiOutlineClose />
         </button>
       </div>
 
-      {/* Menü elemek */}
+      {/* Sidebar Menu Items */}
       <div className="p-4 text-white space-y-2">
-        <SidebarItem icon="🛠️" title="Hiba bejelentések" />
-        <SidebarItem icon="📚" title="Jelentések" />
-        <SidebarItem icon="📄" title="Igényfelvétel" />
+        <SidebarItem icon="🛠️" title="Hiba bejelentések" path="/hibabejelentesek" />
+        <SidebarItem icon="📚" title="Jelentések" path="/jelentesek" />
+        <SidebarItem icon="📄" title="Igényfelvétel" path="/igenyfelvetel" />
 
-        {/* Statisztikai értékek a sidebarban, formázva a referencia kép alapján */}
+        {/* Sidebar Statistics */}
         <div className="mt-6 space-y-4">
-          <SidebarMain title="Szoftverek" />
-          <SidebarMain title="Licenszek" />
-          <SidebarMain title="Projektek"/>
-          <SidebarMain title="Igények"/>
+          <SidebarMain title="Szoftverek" path="/eszkozok" />
+          <SidebarMain title="Licenszek" path="/eszkozok" />
+          <SidebarMain title="Projektek" path="/eszkozok" />
+          <SidebarMain title="Igények" path="/igenyek" />
         </div>
       </div>
     </div>
   );
 };
 
-const SidebarItem = ({ icon, title }) => {
+const SidebarItem = ({ icon, title, path }) => {
   return (
-    <div className="flex items-center space-x-2 px-3 py-2 rounded-md hover:bg-gray-800 cursor-pointer">
+    <Link
+      to={path}
+      className="flex items-center space-x-2 px-3 py-2 rounded-md hover:bg-gray-800 cursor-pointer"
+    >
       <span className="text-blue-400 text-lg">{icon}</span>
       <span className="text-white">{title}</span>
-    </div>
+    </Link>
   );
 };
 
-const SidebarMain = ({ title, value }) => {
+const SidebarMain = ({ title, path }) => {
   return (
-    <div className="bg-gray-800 p-4 rounded-lg shadow-md text-center border border-gray-700">
+    <Link
+      to={path}
+      className="block bg-gray-800 p-4 rounded-lg shadow-md text-center border border-gray-700 hover:bg-gray-700 transition"
+    >
       <h2 className="text-sm text-gray-400">{title}</h2>
-      <p className="text-lg font-bold text-white">{value}</p>
-    </div>
+    </Link>
   );
 };
 
