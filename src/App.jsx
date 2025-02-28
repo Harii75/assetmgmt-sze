@@ -7,13 +7,12 @@ import StatCard from "./components/StatCard.jsx";
 import RecentAdded from "./components/RecentAdded.jsx";
 import Greeting from "./components/Greeting.jsx";
 
-// Import all pages
 import NotFound from "./pages/NotFound.jsx";
-import Eszkozok from "./pages/Eszkozok.jsx";
 import Igenyek from "./pages/Igenyek.jsx";
 import HibaBejelentesek from "./pages/HibaBejelentesek.jsx";
 import Igényfelvétel from "./pages/Igenyfelvetel.jsx";
 import Jelentesek from "./pages/Jelentesek.jsx";
+import HardwareList from "./pages/HardwareList.jsx";
 
 function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -35,7 +34,7 @@ function App() {
               }/>
 
               {/* Routes from the provided image */}
-              <Route path="/eszkozok" element={<Eszkozok />} />
+              <Route path="/eszkozok" element={<HardwareList/>} />
               <Route path="/igenyek" element={<Igenyek />} />
               <Route path="/hibabejelentesek" element={<HibaBejelentesek />} />
               <Route path="/igenyfelvetel" element={<Igényfelvétel />} />
