@@ -5,14 +5,15 @@ import Header from "./components/Header.jsx";
 import Sidebar from "./components/Sidebar.jsx";
 import StatCard from "./components/StatCard.jsx";
 import RecentAdded from "./components/RecentAdded.jsx";
-import Greeting from "./components/Greeting.jsx";
+import YearlySoftwareChart from "./components/YearlySoftwareChart";
 
 import NotFound from "./pages/NotFound.jsx";
 import Igenyek from "./pages/Igenyek.jsx";
 import HibaBejelentesek from "./pages/HibaBejelentesek.jsx";
 import Igényfelvétel from "./pages/Igenyfelvetel.jsx";
-import Jelentesek from "./pages/Jelentesek.jsx";
 import HardwareList from "./pages/HardwareList.jsx";
+import FilteredHardwareList from "./pages/FilteredHardwareList.jsx";
+
 
 function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -27,20 +28,19 @@ function App() {
             <Routes>
               <Route path="/" element={
                 <>
-                  <Greeting />
                   <StatCard />
+                  <YearlySoftwareChart/>
                   <RecentAdded />
                 </>
               }/>
-
-              {/* Routes from the provided image */}
               <Route path="/eszkozok" element={<HardwareList/>} />
               <Route path="/igenyek" element={<Igenyek />} />
               <Route path="/hibabejelentesek" element={<HibaBejelentesek />} />
               <Route path="/igenyfelvetel" element={<Igényfelvétel />} />
-              <Route path="/jelentesek" element={<Jelentesek />} />
-
-              {/* Catch-all for unknown routes */}
+              <Route path="/eszkozok" element={<HardwareList />} />
+              <Route path="/eszkozok/szoftverek" element={<FilteredHardwareList category="Szoftver" />} />
+              <Route path="/eszkozok/licenszek" element={<FilteredHardwareList category="Licensz" />} />
+              <Route path="/eszkozok/projektek" element={<FilteredHardwareList category="Projektek" />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

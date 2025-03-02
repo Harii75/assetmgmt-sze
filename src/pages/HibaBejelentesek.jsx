@@ -4,102 +4,102 @@ const HibaBejelentesek = () => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    category: "",
-    severity: "Alacsony",
     screenshots: [],
   });
 
+  const [errors, setErrors] = useState({});
   const [imagePreviews, setImagePreviews] = useState([]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: "" });
   };
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
+    if (files.length === 0) return;
 
-    // Generate previews
-    const newPreviews = files.map((file) => URL.createObjectURL(file));
+    const newPreviews = files.map((file) => ({
+      url: URL.createObjectURL(file),
+      file,
+    }));
 
     setFormData({
       ...formData,
       screenshots: [...formData.screenshots, ...files],
     });
-    setImagePreviews([...imagePreviews, ...newPreviews]);
+    setImagePreviews((prev) => [...prev, ...newPreviews]);
+  };
+
+  const removeImage = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      screenshots: prev.screenshots.filter((_, i) => i !== index),
+    }));
+
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    let newErrors = {};
+
+    if (!formData.title.trim()) newErrors.title = "A mező kitöltése kötelező!";
+    if (!formData.description.trim()) newErrors.description = "A mező kitöltése kötelező!";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     alert("Hibabejelentés sikeresen elküldve!");
     console.log("Beküldött adatok:", formData);
   };
 
   return (
-    <div className="max-w-3xl mx-auto bg-gray-100 p-8 rounded-lg shadow-lg mt-10">
-      <h1 className="text-2xl font-semibold mb-6 text-center">
-        Hiba bejelentése
-      </h1>
+    <div className="w-full bg-gray-100 flex justify-center items-center p-10">
+      <div className="w-full max-w-[99%] bg-white p-10 rounded-md shadow-md border border-gray-300">
+        <h1 className="text-2xl font-semibold mb-6">Hiba bejelentése</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Megnevezés */}
-        <div>
-          <label className="block font-medium">Hiba megnevezése:</label>
-          <input
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
-            required
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="relative">
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+              className={`w-full p-3 border rounded-md bg-white focus:outline-none peer ${
+                errors.title ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+              }`}
+              placeholder="Cím *"
+            />
+            {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
+          </div>
 
-        {/* Leírás */}
-        <div>
-          <label className="block font-medium">Hiba leírása:</label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            rows="4"
-            className="w-full p-2 border border-gray-300 rounded"
-            required
-          ></textarea>
-        </div>
+          <div className="relative">
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              required
+              rows="4"
+              className={`w-full p-3 border rounded-md bg-white focus:outline-none peer ${
+                errors.description ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+              }`}
+              placeholder="Leírás *"
+            ></textarea>
+            {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
+          </div>
 
-        {/* Kategória */}
-        <div>
-          <label className="block font-medium">Kategória:</label>
-          <input
-            type="text"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
-            required
-          />
-        </div>
+          <div className="border-t border-gray-300 pt-4">
+            <label className="block font-medium text-gray-600 mb-2">Képek</label>
+            <div className="w-full p-3 border border-gray-300 rounded-md bg-gray-50 text-gray-500">
+              {imagePreviews.length === 0 ? "Nincsenek képek feltöltve!" : "Feltöltött képek:"}
+            </div>
+          </div>
 
-        {/* Súlyosság */}
-        <div>
-          <label className="block font-medium">Súlyosság:</label>
-          <select
-            name="severity"
-            value={formData.severity}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
-          >
-            <option value="Alacsony">Alacsony</option>
-            <option value="Közepes">Közepes</option>
-            <option value="Magas">Magas</option>
-            <option value="Kritikus">Kritikus</option>
-          </select>
-        </div>
-
-        {/* File feltölés */}
-        <div>
-          <label className="block font-medium">Képernyőkép feltöltése (opcionális):</label>
-          <div className="flex items-center space-x-4">
+          <div>
             <input
               type="file"
               accept="image/*"
@@ -110,53 +110,44 @@ const HibaBejelentesek = () => {
             />
             <label
               htmlFor="fileUpload"
-              className="cursor-pointer bg-gray-700 text-white px-4 py-2 shadow-md hover:bg-gray-800 transition"
+              className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-600 transition inline-flex items-center space-x-2"
             >
-              Képek feltöltése
+              <span>📤</span>
+              <span>Kép(ek) feltöltése</span>
             </label>
           </div>
 
-          {/* Feltöltött filenevek listázása */}
-          <div className="mt-3 bg-gray-200 p-2 text-gray-900">
-            <h3 className="font-semibold">Feltöltött fájlok:</h3>
-            {formData.screenshots.length > 0 ? (
-              <ul className="list-disc pl-5">
-                {formData.screenshots.map((file, index) => (
-                  <li key={index}>{file.name}</li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-gray-500">Még nincs fájl feltöltve.</p>
-            )}
-          </div>
-
-        </div>
-
-
-        {/* Előnézet */}
-        {imagePreviews.length > 0 && (
-          <div className="mt-4 text-center">
-            <p className="text-sm text-gray-600">Feltöltött képek előnézete:</p>
-            <div className="grid grid-cols-3 gap-4 mt-2">
-              {imagePreviews.map((src, index) => (
-                <img
-                  key={index}
-                  src={src}
-                  alt={`Bug Screenshot ${index + 1}`}
-                  className="rounded-lg shadow-md max-h-32 mx-auto"
-                />
+          {imagePreviews.length > 0 && (
+            <div className="mt-4 grid grid-cols-3 gap-4">
+              {imagePreviews.map((preview, index) => (
+                <div key={index} className="relative group">
+                  <img
+                    src={preview.url}
+                    alt={`Preview ${index + 1}`}
+                    className="rounded-md shadow-md max-h-32 object-cover w-full"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-80 hover:opacity-100 transition"
+                  >
+                    ✕
+                  </button>
+                </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Submit gomb */}
-        <div className="text-center">
-          <button type="submit" className="bg-red-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-red-600 transition">
-            Bejelentés küldése
-          </button>
-        </div>
-      </form>
+          <div className="text-center mt-6">
+            <button
+              type="submit"
+              className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-600 transition inline-flex items-center space-x-2"
+            >
+              📥 Bejelentés
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

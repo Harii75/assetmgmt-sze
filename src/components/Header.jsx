@@ -1,21 +1,34 @@
-import { Link } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import szeLogo from "../assets/sze-logo.svg";
-import { FiMenu, FiPower } from "react-icons/fi"; 
+import { FiMenu, FiPower } from "react-icons/fi";
 
 const Header = ({ isSidebarOpen, toggleSidebar }) => {
-  return (
-    <header className="flex items-center justify-between bg-gray-800 p-4 shadow-md min-h-[60px]">
-      <div className="flex items-center space-x-2">
-        {!isSidebarOpen && ( 
-          <button onClick={toggleSidebar} className="text-white text-2xl">
-            <FiMenu />
-          </button>
-        )}
+  const navigate = useNavigate();
 
-        <Link to="/" className="flex items-center space-x-2">
-          <img src={szeLogo} alt="Logo" className="h-8 w-8 cursor-pointer" />
-          <span className="text-white font-semibold text-lg cursor-pointer">SZE - Eszközmenedzsment</span>
-        </Link>
+  return (
+    <header className="flex items-center justify-between bg-[#41465C] p-1 shadow-md min-h-[60px]">
+      <div className="flex items-center space-x-2">
+        {!isSidebarOpen && (
+          <>
+            <button
+              onClick={toggleSidebar}
+              className="flex items-center space-x-2 text-white text-lg"
+            >
+              <FiMenu className="text-2xl ml-10" />
+            </button>
+
+            {/* Hide when sidebar is open */}
+            <div
+              onClick={() => navigate("/")}
+              className="flex items-center space-x-2 cursor-pointer"
+            >
+              <img src={szeLogo} alt="Logo" className="h-8 w-8 ml-5" />
+              <span className="font-semibold text-2xl text-white">
+                Eszközmenedzsment
+              </span>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="flex items-center space-x-6">

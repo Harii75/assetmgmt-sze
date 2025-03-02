@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const HardwareList = () => {
+const HardwareList = ({ category }) => {
   const [hardwareData, setHardwareData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,8 +17,8 @@ const HardwareList = () => {
         const response = await fetch(API_URL, {
           method: "GET",
           headers: {
-            "Authorization": `Bearer ${API_TOKEN}`,
-            "Accept": "application/json",
+            Authorization: `Bearer ${API_TOKEN}`,
+            Accept: "application/json",
           },
         });
 
@@ -27,8 +27,12 @@ const HardwareList = () => {
         }
 
         const result = await response.json();
-        setHardwareData(result.rows || []);
-        setFilteredData(result.rows || []);
+        const filteredByCategory = result.rows?.filter(
+          (item) => item.custom_fields?.Kategória?.value === category
+        ) || [];
+
+        setHardwareData(filteredByCategory);
+        setFilteredData(filteredByCategory);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -37,8 +41,9 @@ const HardwareList = () => {
     };
 
     fetchData();
-  }, []);
+  }, [category]);
 
+  
   const parseIntOrZero = (value) => {
     const parsedValue = parseInt(value, 10);
     return isNaN(parsedValue) ? 0 : parsedValue;
@@ -47,7 +52,7 @@ const HardwareList = () => {
   const formatNumber = (num) => {
     return num.toLocaleString("hu-HU");
   };
-
+  
   const handleSearch = (event) => {
     const query = event.target.value.toLowerCase();
     setSearchQuery(query);
@@ -76,37 +81,39 @@ const HardwareList = () => {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-3xl font-semibold mb-4">Összes eszköz</h2>
+    <div className="p-6">
+      <h2 className="text-3xl font-bold mb-4">
+        {category === "Projektek" ? category : `${category}ek`}
+      </h2>
 
-      <div className="mb-3">
+      <div className="mb-4">
         <input
           type="text"
           placeholder="🔍 Keresés..."
           value={searchQuery}
           onChange={handleSearch}
-          className="w-full p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </div>
 
-      {loading && <p className="text-blue-600 text-sm">Betöltés...</p>}
-      {error && <p className="text-red-600 text-sm">Hiba: {error}</p>}
+      {loading && <p className="text-blue-600">Betöltés...</p>}
+      {error && <p className="text-red-600">Hiba: {error}</p>}
 
       {!loading && !error && (
         <div className="bg-white shadow-sm rounded-md overflow-hidden">
-          <table className="w-full text-sm border border-gray-200">
-            <thead className="bg-gray-100 text-gray-600 font-medium">
-              <tr className="border-b border-gray-300">
-                <th className="p-2 text-left">Azonosító</th>
-                <th className="p-2 text-left">Eszköz neve</th>
-                <th className="p-2 text-left">Kategória</th>
-                <th className="p-2 text-left">Megnevezés</th>
-                <th className="p-2 text-left">Hely</th>
-                <th className="p-2 text-left">Műveletek</th>
-              </tr>
-            </thead>
-            <tbody className="text-gray-800">
-              {filteredData.map((item, index) => (
+        <table className="w-full text-sm border border-gray-200">
+          <thead className="bg-gray-100 text-gray-600 font-medium">
+            <tr className="border-b border-gray-300">
+              <th className="p-2 text-left">Azonosító</th>
+              <th className="p-2 text-left">Eszköz neve</th>
+              <th className="p-2 text-left">Kategória</th>
+              <th className="p-2 text-left">Megnevezés</th>
+              <th className="p-2 text-left">Hely</th>
+              <th className="p-2 text-left">Műveletek</th>
+            </tr>
+          </thead>
+            <tbody>
+              {filteredData.map((item) => (
                 <React.Fragment key={item.id}>
                   <tr
                     className="border-b border-gray-300 hover:bg-gray-50 text-sm cursor-pointer"
