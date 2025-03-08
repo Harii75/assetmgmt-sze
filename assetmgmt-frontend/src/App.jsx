@@ -13,8 +13,8 @@ import HibaBejelentesek from "./pages/HibaBejelentesek.jsx";
 import Igényfelvétel from "./pages/Igenyfelvetel.jsx";
 import HardwareList from "./pages/HardwareList.jsx";
 import FilteredHardwareList from "./pages/FilteredHardwareList.jsx";
-import Hibak from "./pages/Hibak.jsx"
-
+import Hibak from "./pages/Hibak.jsx";
+import LoginPage from "./pages/LoginPage"; // Import Login Page
 
 function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -34,6 +34,7 @@ function App() {
                   <RecentAdded />
                 </>
               }/>
+              <Route path="/login" element={<LoginPage />} /> 
               <Route path="/eszkozok" element={<HardwareList/>} />
               <Route path="/igenyek" element={<Igenyek />} />
               <Route path="/hibabejelentesek" element={<HibaBejelentesek />} />
