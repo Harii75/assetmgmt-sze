@@ -62,7 +62,7 @@ const HibaBejelentesek = () => {
     });
 
     try {
-      const response = await fetch("http://localhost:5000/api/hibabejelentes", {
+      const response = await fetch("http://192.168.101.60:5000/api/hibabejelentes", {
         method: "POST",
         body: formDataToSend, 
       });

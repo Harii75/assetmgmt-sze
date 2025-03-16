@@ -38,7 +38,7 @@ const Igenyfelvetel = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/igenyfelvetel", {
+      const response = await fetch("http://192.168.101.60:5000/api/igenyfelvetel", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

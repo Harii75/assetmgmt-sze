@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const STATUS_OPTIONS = {
   new: "Új",
@@ -14,7 +15,7 @@ const STATUS_TRANSITIONS = {
   solved: [],
 };
 
-const API_URL = "http://localhost:5000/api/hibabejelentesek";
+const API_URL = "http://192.168.101.60:5000/api/hibabejelentesek";
 
 const Hibak = () => {
   const [reports, setReports] = useState([]);
@@ -132,10 +133,10 @@ const Hibak = () => {
                       report.screenshots.map((url, index) => (
                         <img
                           key={index}
-                          src={`http://localhost:5000${url}`}
+                          src={`http://192.168.101.60:5000${url}`}
                           alt="screenshot"
                           className="w-16 h-16 rounded-md shadow-md object-cover cursor-pointer hover:scale-110 transition"
-                          onClick={() => setSelectedImage(`http://localhost:5000${url}`)}
+                          onClick={() => setSelectedImage(`http://192.168.101.60:5000${url}`)}
                         />
                       ))
                     ) : (

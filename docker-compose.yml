@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./assetmgmt-backend
+    container_name: assetmgmt-backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./assetmgmt-backend/.env
+    networks:
+      - assetmgmt-net
+
+  frontend:
+    build:
+      context: ./assetmgmt-frontend
+    container_name: assetmgmt-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./assetmgmt-frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_BACKEND_URL=http://proxy/api
+    command: ["npm", "run", "dev", "--", "--host"]
+    networks:
+      - assetmgmt-net
+
+  nginx:
+    image: nginx:latest
+    container_name: assetmgmt-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl/cert.pem:/etc/nginx/ssl/cert.pem:ro
+      - ./ssl/key.pem:/etc/nginx/ssl/key.pem:ro
+    depends_on:
+      - frontend
+    networks:
+      - assetmgmt-net
+
+networks:
+  assetmgmt-net:
+    external: true
+

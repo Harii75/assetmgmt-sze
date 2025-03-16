@@ -18,7 +18,7 @@ const STATUS_TRANSITIONS = {
   completed: [],
 };
 
-const API_URL = "http://localhost:5000/api/igenyfelvetel";
+const API_URL = "http://192.168.101.60:5000/api/igenyfelvetel";
 
 const Igenyek = () => {
   const [requests, setRequests] = useState([]);
