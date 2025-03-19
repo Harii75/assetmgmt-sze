@@ -84,8 +84,7 @@ const RecentAdded = () => {
                 <th className="p-3 text-left">Azonosító</th>
                 <th className="p-3 text-left">Eszköz neve</th>
                 <th className="p-3 text-left">Kategória</th>
-                <th className="p-3 text-right">Bruttó érték</th>
-                <th className="p-3 text-right">Beszerzés Dátuma</th>
+                <th className="p-3 text-right">Beszerzés dátuma</th>
               </tr>
             </thead>
             <tbody>
@@ -94,12 +93,6 @@ const RecentAdded = () => {
                   <td className="p-3">{item.asset_tag || "N/A"}</td>
                   <td className="p-3">{item.name || "N/A"}</td>
                   <td className="p-3">{item.custom_fields?.Kategória?.value || "N/A"}</td>
-                  <td className="p-3 text-right whitespace-nowrap">
-                    {item.custom_fields?.Brutto_ertek?.value
-                      ? Number(item.custom_fields.Brutto_ertek.value).toLocaleString("hu-HU")
-                      : "N/A"}{" "}
-                    HUF
-                  </td>
                   <td className="p-3 text-right whitespace-nowrap">
                     {new Date(item.custom_fields?.["Beszerzés Dátuma"]?.value).toLocaleDateString("hu-HU")}
                   </td>

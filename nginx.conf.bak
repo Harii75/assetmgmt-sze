@@ -5,11 +5,22 @@ events {
 }
 
 http {
+    # Redirect all HTTP traffic to HTTPS
     server {
         listen 80 default_server;
         listen [::]:80 default_server;
         server_name _;
+
         return 301 https://$host$request_uri;
+    }
+
+    # Redirect direct access to 5173
+    server {
+        listen 5173;
+        listen [::]:5173;
+        server_name 192.168.101.60;
+
+        return 301 https://192.168.101.60;
     }
 
     server {
@@ -19,28 +30,35 @@ http {
         ssl_certificate /etc/nginx/ssl/cert.pem;
         ssl_certificate_key /etc/nginx/ssl/key.pem;
 
+        # Frontend (React app running on Vite port 5173)
         location / {
             proxy_pass http://192.168.101.60:5173;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            # WebSockets support
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "Upgrade";
         }
 
-        # Proxy API requests to backend (port 5000, stays HTTP)
-        location /api/ {
-            proxy_pass http://192.168.101.60:5000;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        # Backend API (Node.js running on port 5000)
+	location /api/ {
+    		proxy_pass http://192.168.101.60:5000;  # Fix: Use HTTP
+    		proxy_set_header Host $host;
+    		proxy_set_header X-Real-IP $remote_addr;
+    		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
-            # Allow CORS if needed
-            add_header Access-Control-Allow-Origin *;
-            add_header Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE";
-            add_header Access-Control-Allow-Headers "Content-Type, Authorization";
-            if ($request_method = OPTIONS) {
-                return 204;
-            }
-        }
+    		# Allow CORS
+    		add_header Access-Control-Allow-Origin *;
+    		add_header Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE";
+    		add_header Access-Control-Allow-Headers "Content-Type, Authorization";
+
+    		if ($request_method = OPTIONS) {
+    		    return 204;
+    		}
+	}
     }
 }
 

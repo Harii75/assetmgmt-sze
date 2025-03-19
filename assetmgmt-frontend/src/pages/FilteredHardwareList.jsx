@@ -108,7 +108,7 @@ const HardwareList = ({ category }) => {
               <th className="p-2 text-left">Eszköz neve</th>
               <th className="p-2 text-left">Kategória</th>
               <th className="p-2 text-left">Megnevezés</th>
-              <th className="p-2 text-left">Hely</th>
+              <th className="p-2 text-left">Szervezeti egység</th>
               <th className="p-2 text-left">Műveletek</th>
             </tr>
           </thead>
@@ -164,7 +164,13 @@ const HardwareList = ({ category }) => {
                               <span className="mr-1 text-gray-600 font-medium">Nyilv. hely kód:</span>
                               <span className="text-gray-900">{item.custom_fields?.["Nyilv hely kód"]?.value || "N/A"}</span>
                             </div>
-                          </div>
+                            <div className="flex items-center">
+                              <span className="mr-1 text-gray-600 font-medium">Felelős:</span>
+                              <span className="text-gray-900 capitalize">
+                                {item.custom_fields?.Személy?.value?.toLowerCase() || "N/A"}
+                              </span>
+                            </div>
+			  </div>
                         </div>
                       </td>
                     </tr>

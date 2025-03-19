@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+
+import { useEffect, useState } from "react";
 
 const STATUS_OPTIONS = {
   new: "Új",
@@ -14,16 +15,15 @@ const STATUS_TRANSITIONS = {
   pending: ["reviewing", "in_progress", "rejected"],
   reviewing: ["in_progress", "rejected"],
   in_progress: ["completed", "rejected"],
-  rejected: [],
-  completed: [],
+  rejected: ["pending", "in_progress", "reviewing", "completed"], // 🔓 Now modifiable
+  completed: ["pending", "in_progress", "reviewing", "rejected"], // 🔓 Now modifiable
 };
 
-const API_URL = "http://192.168.101.60:5000/api/igenyfelvetel";
+const API_URL = "/api/igenyfelvetel";
 
 const Igenyek = () => {
   const [requests, setRequests] = useState([]);
   const [expandedRequest, setExpandedRequest] = useState(null);
-  const [confirming, setConfirming] = useState(null);
 
   useEffect(() => {
     fetchRequests();
@@ -33,7 +33,7 @@ const Igenyek = () => {
     try {
       const response = await fetch(API_URL);
       if (!response.ok) throw new Error("Hiba történt az adatok lekérésekor.");
-  
+
       const data = await response.json();
       setRequests(data);
     } catch (error) {
@@ -41,19 +41,13 @@ const Igenyek = () => {
     }
   };
   
-
   const updateStatus = async (id, newStatus) => {
-    const currentStatus = requests.find((r) => r.id === id)?.status;
+    const currentStatus = requests.find((r) => r.id === id)?.status || "new";
+  
     if (!STATUS_TRANSITIONS[currentStatus]?.includes(newStatus)) return;
-  
-    if (newStatus === "rejected" || newStatus === "completed") {
-      setConfirming({ id, status: newStatus });
-    } else {
-      await sendUpdate(id, { status: newStatus });
-    }
+
+    await sendUpdate(id, { status: newStatus });
   };
-  
-  
 
   const sendUpdate = async (id, updatedData) => {
     try {
@@ -62,9 +56,9 @@ const Igenyek = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedData),
       });
-  
+
       if (!response.ok) throw new Error("Nem sikerült frissíteni az állapotot.");
-  
+
       setRequests((prev) =>
         prev.map((req) =>
           req.id === id ? { ...req, status: updatedData.status } : req
@@ -74,24 +68,18 @@ const Igenyek = () => {
       console.error("Hiba frissítés közben:", error);
     }
   };
-  
-  const confirmStatusChange = async () => {
-    if (confirming) {
-      await sendUpdate(confirming.id, { status: confirming.status });
-      setConfirming(null);
-    }
-  };
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-4xl font-bold text-gray-800 mb-4">Igények</h1>
+      <h1 className="text-4xl font-bold text-gray-800 mb-4">Javaslatok</h1>
 
       <div className="bg-white shadow-md rounded-lg p-4">
-        <div className="grid grid-cols-[3fr_1fr_1fr_1fr] gap-4 p-4 border-b border-gray-300 font-semibold text-gray-700 bg-gray-200 rounded-t-lg">
-          <span>Igény neve és leírása</span>
-          <span>Állapot</span>
+        <div className="grid grid-cols-[3fr_1fr_1fr_1fr_auto] gap-4 p-4 border-b border-gray-300 font-semibold text-gray-700 bg-gray-200 rounded-t-lg">
+          <span>Javaslat neve és leírása</span>
+	  <span>Állapot</span>
           <span>Kapcsolattartó</span>
           <span>Dátum</span>
+          <span className="text-center">Műveletek</span>
         </div>
 
         {requests.length === 0 ? (
@@ -107,7 +95,7 @@ const Igenyek = () => {
             return (
               <div key={request.id} className="border-b border-gray-300 hover:bg-gray-50 transition">
                 <div
-                  className="grid grid-cols-[3fr_1fr_1fr_1fr] gap-4 items-center p-4 cursor-pointer"
+                  className="grid grid-cols-[3fr_1fr_1fr_1fr_auto] gap-4 items-center p-4 cursor-pointer"
                   onClick={() => setExpandedRequest(isExpanded ? null : request.id)}
                 >
                   <div className="flex flex-col">
@@ -125,8 +113,7 @@ const Igenyek = () => {
                         }}
                         disabled={STATUS_TRANSITIONS[request.status].length === 0}
                         className={`border rounded-md p-2 w-full text-sm shadow-sm cursor-pointer
-                          ${STATUS_TRANSITIONS[request.status].length === 0 ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-gray-100 text-gray-800"}
-                        `}
+                          ${STATUS_TRANSITIONS[request.status].length === 0 ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-gray-100 text-gray-800"}`}
                       >
                         <option value={request.status}>{STATUS_OPTIONS[request.status]}</option>
                         {STATUS_TRANSITIONS[request.status].map((status) => (
@@ -135,8 +122,6 @@ const Igenyek = () => {
                           </option>
                         ))}
                       </select>
-
-
                     ) : (
                       <span className="p-2 rounded-md bg-gray-200 text-gray-800 text-sm block text-center">
                         {STATUS_OPTIONS[request.status]}
@@ -150,6 +135,16 @@ const Igenyek = () => {
                   </div>
 
                   <span className="text-gray-700">{formattedDate}</span>
+
+                  <span className="text-center">
+                    <span
+                      className={`inline-block transition-transform duration-200 text-blue-500 ${
+                        isExpanded ? "rotate-180" : ""
+                      }`}
+                    >
+                      ▼
+                    </span>
+                  </span>
                 </div>
 
                 {isExpanded && (
@@ -191,24 +186,9 @@ const Igenyek = () => {
           })
         )}
       </div>
-
-      {confirming && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <h2 className="text-lg font-semibold mb-4">
-              Biztosan véglegesíti az állapotot: {STATUS_OPTIONS[confirming.status]}?
-            </h2>
-            <button onClick={confirmStatusChange} className="bg-green-600 text-white px-4 py-2 rounded-md">
-              Igen
-            </button>
-            <button onClick={() => setConfirming(null)} className="bg-red-500 text-white px-4 py-2 rounded-md ml-4">
-              Mégse
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
 export default Igenyek;
+

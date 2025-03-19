@@ -23,16 +23,18 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       </div>
 
       <div className="px-4 pb-4 text-white space-y-2">
-        <SidebarItem icon="🛠️" title="Hibabejelentés" path="/hibabejelentesek" />
-        <SidebarItem icon="📄" title="Igényfelvétel" path="/igenyfelvetel" />
-        <div className="w-full border-b border-gray-600 my-4"></div>
-        <SidebarItem icon="🖥️" title="Összes eszköz" path="/eszkozok" />
-        <div className="w-full border-b border-gray-600 my-4"></div>
+        {/* Eszközök és erőforrások */}
         <SidebarItem icon="💾" title="Szoftverek" path="/eszkozok/szoftverek" />
         <SidebarItem icon="🔑" title="Licenszek" path="/eszkozok/licenszek" />
         <SidebarItem icon="📂" title="Projektek" path="/eszkozok/projektek" />
+        <SidebarItem icon="🖥️ " title="Összes eszköz" path="/eszkozok" />
+	<div className="w-full border-b border-gray-600 my-4"></div>
+        <SidebarItem icon="📄" title="Eszközjavaslat" path="/igenyfelvetel" />
+        <SidebarItem icon="🛠️" title="Hibabejelentés" path="/hibabejelentesek" />
         <div className="w-full border-b border-gray-600 my-4"></div>
-        <SidebarItem icon="📌" title="Leadott igények" path="/igenyek" />
+
+        {/* Admin-only items (these will be hidden later based on rights) */}
+        <SidebarItem icon="📌" title="Leadott javaslatok" path="/igenyek" />
         <SidebarItem icon="🔧" title="Bejelentett hibák" path="/hibak" />
       </div>
     </div>
@@ -52,3 +54,4 @@ const SidebarItem = ({ icon, title, path }) => {
 };
 
 export default Sidebar;
+

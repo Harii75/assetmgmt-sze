@@ -15,7 +15,7 @@ const STATUS_TRANSITIONS = {
   solved: [],
 };
 
-const API_URL = "http://192.168.101.60:5000/api/hibabejelentesek";
+const API_URL = "/api/hibabejelentesek";
 
 const Hibak = () => {
   const [reports, setReports] = useState([]);
@@ -133,10 +133,10 @@ const Hibak = () => {
                       report.screenshots.map((url, index) => (
                         <img
                           key={index}
-                          src={`http://192.168.101.60:5000${url}`}
+                          src={`https://192.168.101.60${url}`}
                           alt="screenshot"
                           className="w-16 h-16 rounded-md shadow-md object-cover cursor-pointer hover:scale-110 transition"
-                          onClick={() => setSelectedImage(`http://192.168.101.60:5000${url}`)}
+                          onClick={() => setSelectedImage(`https://192.168.101.60${url}`)}
                         />
                       ))
                     ) : (

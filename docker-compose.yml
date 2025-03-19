@@ -11,7 +11,8 @@ services:
       - ./assetmgmt-backend/.env
     networks:
       - assetmgmt-net
-
+    volumes:
+      - ./assetmgmt-backend/uploads:/app/uploads
   frontend:
     build:
       context: ./assetmgmt-frontend
