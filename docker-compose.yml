@@ -39,6 +39,8 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ssl/cert.pem:/etc/nginx/ssl/cert.pem:ro
       - ./ssl/key.pem:/etc/nginx/ssl/key.pem:ro
+      - /opt/snipeit/certs/snipeit.key:/etc/nginx/ssl/snipeit.key:ro
+      - /opt/snipeit/certs/snipeit.crt:/etc/nginx/ssl/snipeit.crt:ro
     depends_on:
       - frontend
     networks:
