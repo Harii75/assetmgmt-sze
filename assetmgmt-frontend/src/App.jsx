@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import "./App.css";
 import Header from "./components/Header.jsx";
 import Sidebar from "./components/Sidebar.jsx";
@@ -16,6 +16,7 @@ import YearlySoftwareChart from "./components/YearlySoftwareChart";
 import RecentAdded from "./components/RecentAdded";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Unauthorized from "./pages/Unauthorized";
 
 function App() {
     return (
@@ -30,6 +31,9 @@ function App() {
 const MainContent = () => {
     const { user, loading } = useAuth();
     const [isSidebarOpen, setSidebarOpen] = useState(false);
+    const location = useLocation();
+
+    const hideLayout = location.pathname === "/unauthorized";
 
     if (loading) {
         return <div className="flex items-center justify-center min-h-screen text-white text-xl">Loading...</div>;
@@ -37,26 +41,29 @@ const MainContent = () => {
 
     return (
         <div className="flex">
-            {user && (
+            {user && !hideLayout && (
                 <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setSidebarOpen(!isSidebarOpen)} />
             )}
             <div className={`flex-1 transition-all duration-300 ${isSidebarOpen ? "ml-64" : "ml-0"}`}>
-                {user && (
+                {user && !hideLayout && (
                     <Header isSidebarOpen={isSidebarOpen} toggleSidebar={() => setSidebarOpen(!isSidebarOpen)} />
                 )}
                 <main>
                     <Routes>
                         <Route path="/login" element={<LoginPage />} />
-
-                        <Route path="/" element={
-                            <ProtectedRoute>
-                                <>
-                                    <StatCard />
-                                    <YearlySoftwareChart />
-                                    <RecentAdded />
-                                </>
-                            </ProtectedRoute>
-                        } />
+                        <Route
+                            path="/"
+                            element={
+                                <ProtectedRoute>
+                                    <>
+                                        <StatCard />
+                                        <YearlySoftwareChart />
+                                        <RecentAdded />
+                                    </>
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route path="/unauthorized" element={<Unauthorized />} />
                         <Route path="/eszkozok" element={<ProtectedRoute><HardwareList /></ProtectedRoute>} />
                         <Route path="/igenyek" element={<ProtectedRoute><Igenyek /></ProtectedRoute>} />
                         <Route path="/hibabejelentesek" element={<ProtectedRoute><HibaBejelentesek /></ProtectedRoute>} />
@@ -74,4 +81,3 @@ const MainContent = () => {
 };
 
 export default App;
-

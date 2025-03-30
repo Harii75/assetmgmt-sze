@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
-const HardwareList = () => {
+const HardwareList = ({ category }) => {
   const [hardwareData, setHardwareData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expanded, setExpanded] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [privilegedUsers, setPrivilegedUsers] = useState([]);
+  const { user } = useAuth();
 
   const API_URL = "https://192.168.101.60:8000/api/v1/hardware";
   const API_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiZWYxYzIyZjQxOThmZGVjNTNiNjk4NjFhNDNhZTFlM2UyOTRkN2VjNjJlNjc0ODQ5MWQ1OWI4NTM3NjUwMjk3ZjcwNmU3MjM2YWY0YmFkYjIiLCJpYXQiOjE3Mzk5ODI0MTEuODI0Njc3LCJuYmYiOjE3Mzk5ODI0MTEuODI0Njc5LCJleHAiOjMwMDIyODY0MTEuODIxMjE3LCJzdWIiOiIxIiwic2NvcGVzIjpbXX0.c6PsoI9u8gqeJKnhz90BU5pgy46WoWCmc_eVuLh_mB77FYFL7bKRi36AbxE9czquoTGmekiOEOJbzchfJ6aphMyZdyLmymp8LuHV4wJr3Qa4GeoNEZvfb2SNkWW3ZV2mbXbBzJ_SDYWAYreWJCUNChWUWWYQCe0CXhynJGCThWRWL_ps3EkYLfUxm_puvFPvk03HfFKpIg0qvVBAYRgpKkWUIDyzuKPyH-tXRcMpeLUuRbPvJXqa7LPIilLm4KLboe8Z2HnlP_UUMTshH_0sCYLHEoEUJ7jZ6n_7eSGp1-DPrhVBxH3yvC8gaikk-q2GPv8Xp67CgFMrJFW2ctInWYX-awXgqgnxqMNGcUFzUfnaTsdoExToLY-4D-DPMN2zSOnmbu6FH3963eSO2FMEdzX4j_fme-LTDsGji7REQ8RslqTcOEMB3vbtGG3LbCXn-r-N_9fVh2cyJvwCrxxd7BeQCiyzO-p4HWqrflCYPSj1VXgDATz6zU_p3imisN5IItSzzOFKU64yp5UQ6uWe3BzTh1G2wVFnAQjJW5mdExtWBvx5HwBD2Mqg2Vey33-k9TCMM6myUFetGiEWUhDEnmTo4KHzNND7DSHWDsQ5Pwy6C6vXf7xKL4SkAL_8W6LCQ3s_EizEmu58bq_M2AqWZ6YyTyjQyxLiVovzgzyXL5o"; 
+  const AUTH_API_URL = "https://192.168.101.60";
 
   useEffect(() => {
     const fetchData = async () => {
@@ -17,18 +21,21 @@ const HardwareList = () => {
         const response = await fetch(API_URL, {
           method: "GET",
           headers: {
-            "Authorization": `Bearer ${API_TOKEN}`,
-            "Accept": "application/json",
+            Authorization: `Bearer ${API_TOKEN}`,
+            Accept: "application/json",
           },
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         const result = await response.json();
-        setHardwareData(result.rows || []);
-        setFilteredData(result.rows || []);
+
+        const rows = result.rows || [];
+        const filteredByCategory = category
+          ? rows.filter((item) => item.custom_fields?.Kategória?.value === category)
+          : rows;
+
+        setHardwareData(filteredByCategory);
+        setFilteredData(filteredByCategory);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -37,7 +44,16 @@ const HardwareList = () => {
     };
 
     fetchData();
+  }, [category]);
+
+  useEffect(() => {
+    fetch(`${AUTH_API_URL}/api/privileged-users`)
+      .then((res) => res.json())
+      .then((data) => setPrivilegedUsers(data.map((e) => e.toLowerCase())))
+      .catch((err) => console.error("Failed to fetch privileged users:", err));
   }, []);
+
+  const isPrivileged = user?.username && privilegedUsers.includes(user.username.toLowerCase());
 
   const parseIntOrZero = (value) => {
     const parsedValue = parseInt(value, 10);
@@ -76,21 +92,23 @@ const HardwareList = () => {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-3xl font-semibold mb-4">Összes eszköz</h2>
+    <div className="p-6">
+      <h2 className="text-3xl font-bold mb-4">
+        {category ? (category === "Projektek" ? category : `${category}ek`) : "Összes eszköz"}
+      </h2>
 
-      <div className="mb-3">
+      <div className="mb-4">
         <input
           type="text"
           placeholder="🔍 Keresés..."
           value={searchQuery}
           onChange={handleSearch}
-          className="w-full p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </div>
 
-      {loading && <p className="text-blue-600 text-sm">Betöltés...</p>}
-      {error && <p className="text-red-600 text-sm">Hiba: {error}</p>}
+      {loading && <p className="text-blue-600">Betöltés...</p>}
+      {error && <p className="text-red-600">Hiba: {error}</p>}
 
       {!loading && !error && (
         <div className="bg-white shadow-sm rounded-md overflow-hidden">
@@ -105,8 +123,8 @@ const HardwareList = () => {
                 <th className="p-2 text-left">Műveletek</th>
               </tr>
             </thead>
-            <tbody className="text-gray-800">
-              {filteredData.map((item, index) => (
+            <tbody>
+              {filteredData.map((item) => (
                 <React.Fragment key={item.id}>
                   <tr
                     className="border-b border-gray-300 hover:bg-gray-50 text-sm cursor-pointer"
@@ -145,14 +163,22 @@ const HardwareList = () => {
                           </div>
 
                           <div className="space-y-3">
-                            <div className="flex items-center">
-                              <span className="mr-1 text-gray-600 font-medium">Nettó érték:</span>
-                              <span className="text-gray-900">{formatNumber(parseIntOrZero(item.custom_fields?.["Nettó érték"]?.value))} HUF</span>
-                            </div>
-                            <div className="flex items-center">
-                              <span className="mr-1 text-gray-600 font-medium">Bruttó érték:</span>
-                              <span className="text-gray-900">{formatNumber(parseIntOrZero(item.custom_fields?.Brutto_ertek?.value))} HUF</span>
-                            </div>
+                            {isPrivileged && (
+                              <>
+                                <div className="flex items-center">
+                                  <span className="mr-1 text-gray-600 font-medium">Nettó érték:</span>
+                                  <span className="text-gray-900">
+                                    {formatNumber(parseIntOrZero(item.custom_fields?.["Nettó érték"]?.value))} HUF
+                                  </span>
+                                </div>
+                                <div className="flex items-center">
+                                  <span className="mr-1 text-gray-600 font-medium">Bruttó érték:</span>
+                                  <span className="text-gray-900">
+                                    {formatNumber(parseIntOrZero(item.custom_fields?.Brutto_ertek?.value))} HUF
+                                  </span>
+                                </div>
+                              </>
+                            )}
                             <div className="flex items-center">
                               <span className="mr-1 text-gray-600 font-medium">Nyilv. hely kód:</span>
                               <span className="text-gray-900">{item.custom_fields?.["Nyilv hely kód"]?.value || "N/A"}</span>
@@ -168,7 +194,7 @@ const HardwareList = () => {
                       </td>
                     </tr>
                   )}
-                </React.Fragment>              
+                </React.Fragment>
               ))}
             </tbody>
           </table>

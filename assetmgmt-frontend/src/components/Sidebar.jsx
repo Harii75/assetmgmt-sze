@@ -1,8 +1,36 @@
 import { AiOutlineClose } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import szeLogo from "../assets/sze-logo.svg";
+import { useAuth } from "../context/AuthContext";
+import { useEffect, useState } from "react";
+
+const AUTH_API_URL = "https://192.168.101.60"; 
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
+  const { user } = useAuth();
+  const [privilegedUsers, setPrivilegedUsers] = useState([]);
+
+  useEffect(() => {
+    const fetchPrivilegedUsers = async () => {
+      try {
+        const response = await fetch(`${AUTH_API_URL}/api/privileged-users`);
+        if (response.ok) {
+          const data = await response.json();
+          setPrivilegedUsers(data.map(email => email.toLowerCase()));
+        } else {
+          console.error("Failed to fetch privileged users.");
+        }
+      } catch (err) {
+        console.error("Error fetching privileged users:", err);
+      }
+    };
+
+    fetchPrivilegedUsers();
+  }, []);
+
+  const isPrivilegedUser = user?.username &&
+    privilegedUsers.includes(user.username.toLowerCase());
+
   return (
     <div
       className={`fixed top-0 left-0 h-full bg-[#242943] shadow-lg transition-all duration-300 w-64 ${
@@ -23,19 +51,21 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       </div>
 
       <div className="px-4 pb-4 text-white space-y-2">
-        {/* Eszközök és erőforrások */}
         <SidebarItem icon="💾" title="Szoftverek" path="/eszkozok/szoftverek" />
         <SidebarItem icon="🔑" title="Licenszek" path="/eszkozok/licenszek" />
         <SidebarItem icon="📂" title="Projektek" path="/eszkozok/projektek" />
-        <SidebarItem icon="🖥️ " title="Összes eszköz" path="/eszkozok" />
-	<div className="w-full border-b border-gray-600 my-4"></div>
+        <SidebarItem icon="🖥️" title="Összes eszköz" path="/eszkozok" />
+        <div className="w-full border-b border-gray-600 my-4"></div>
         <SidebarItem icon="📄" title="Eszközjavaslat" path="/igenyfelvetel" />
         <SidebarItem icon="🛠️" title="Hibabejelentés" path="/hibabejelentesek" />
-        <div className="w-full border-b border-gray-600 my-4"></div>
 
-        {/* Admin-only items (these will be hidden later based on rights) */}
-        <SidebarItem icon="📌" title="Leadott javaslatok" path="/igenyek" />
-        <SidebarItem icon="🔧" title="Bejelentett hibák" path="/hibak" />
+        {isPrivilegedUser && (
+          <>
+            <div className="w-full border-b border-gray-600 my-4"></div>
+            <SidebarItem icon="📌" title="Leadott javaslatok" path="/igenyek" />
+            <SidebarItem icon="🔧" title="Bejelentett hibák" path="/hibak" />
+          </>
+        )}
       </div>
     </div>
   );
@@ -54,4 +84,3 @@ const SidebarItem = ({ icon, title, path }) => {
 };
 
 export default Sidebar;
-

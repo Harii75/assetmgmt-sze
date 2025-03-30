@@ -33,6 +33,20 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
+/* ==========================
+USEREK API 
+*  ==========================  */
+app.get("/api/privileged-users", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM privileged_users");
+    const emails = result.rows.map(row => row.email.toLowerCase());
+    res.json(emails);
+  } catch (error) {
+    console.error("Error fetching privileged users:", error);
+    res.status(500).json({ error: "Hiba történt a jogosult felhasználók lekérésekor!" });
+  }
+});
+
 app.use("/uploads", express.static("uploads"));
 
 /* ==========================

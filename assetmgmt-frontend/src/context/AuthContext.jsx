@@ -1,53 +1,75 @@
 import { createContext, useEffect, useState, useContext } from "react";
 
-// ✅ API URLs (Shibboleth backend)
 const AUTH_API_URL = "https://192.168.101.60";
 
-// ✅ Create authentication context
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isUnauthorized, setIsUnauthorized] = useState(false);
 
-    // ✅ Extract token from URL if present and store it
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get("token");
 
         if (token) {
-            console.log("🔹 Received JWT Token:", token);
-            localStorage.setItem("jwt_token", token); // ✅ Store JWT token
-            window.history.replaceState({}, document.title, "/"); // ✅ Remove token from URL
+            //console.log("🔹 Received JWT Token:", token);
+            localStorage.setItem("jwt_token", token);
+            window.history.replaceState({}, document.title, "/");
             setTimeout(() => {
-                window.location.href = "/"; // ✅ Redirect to home page (NOT /login)
+                window.location.href = "/";
             }, 100);
         }
     }, []);
 
-    // ✅ Check authentication status using JWT token
     useEffect(() => {
-        const checkAuthStatus = async () => {
+        const checkAuthStatus = () => {
             const token = localStorage.getItem("jwt_token");
             if (!token) {
-                console.log("🔹 No JWT token found. User not authenticated.");
+                //console.log("🔹 No JWT token found. User not authenticated.");
                 setUser(null);
+                setIsUnauthorized(false);
                 setLoading(false);
                 return;
             }
 
             try {
-                console.log("🔹 Decoding JWT Token:", token);
+                //console.log("🔹 Decoding JWT Token:", token);
                 const payload = JSON.parse(atob(token.split(".")[1]));
-                console.log("🔹 Decoded User Data:", payload);
+                //console.log("🔹 Decoded User Data:", payload);
 
-                setUser(payload.sub); // ✅ Set user data from JWT
+                const rawSub = payload.sub || {};
+
+                const username = Array.isArray(rawSub.eduPersonPrincipalName)
+                    ? rawSub.eduPersonPrincipalName[0]
+                    : "unknown";
+
+                const displayName = Array.isArray(rawSub.displayName)
+                    ? rawSub.displayName[0]
+                    : username;
+
+                const rawAffiliation = Array.isArray(rawSub.eduPersonScopedAffiliation)
+                    ? rawSub.eduPersonScopedAffiliation[0]
+                    : "";
+
+                const isStudent =
+                    typeof rawAffiliation === "string" &&
+                    rawAffiliation.toLowerCase().includes("student"); //itt majd student legyen
+
+                //console.log("🔹 username:", username);
+                //console.log("🔹 displayName:", displayName);
+                //console.log("🔹 isStudent:", isStudent);
+
+                setUser({ username, displayName });
+                setIsUnauthorized(isStudent);
             } catch (err) {
-                console.error("❌ Invalid token:", err);
+                console.error("Invalid token:", err);
                 setError("Invalid token.");
                 setUser(null);
-                localStorage.removeItem("jwt_token"); // ✅ Remove invalid token
+                setIsUnauthorized(false);
+                localStorage.removeItem("jwt_token");
             } finally {
                 setLoading(false);
             }
@@ -56,27 +78,24 @@ export const AuthProvider = ({ children }) => {
         checkAuthStatus();
     }, []);
 
-    // ✅ Handle login (redirects to Shibboleth SSO)
     const login = () => {
-        console.log("🔹 Redirecting to Shibboleth SSO:", `${AUTH_API_URL}/login`);
+        //console.log("🔹 Redirecting to Shibboleth SSO:", `${AUTH_API_URL}/login`);
         window.location.href = `${AUTH_API_URL}/login`;
     };
 
-    // ✅ Handle logout (clears JWT token and redirects to /login)
     const logout = () => {
-        console.log("🔹 Logging out user.");
+        //console.log("🔹 Logging out user.");
         localStorage.removeItem("jwt_token");
         setUser(null);
-        window.location.href = "/login"; // ✅ Redirect to /login only after logout
+        setIsUnauthorized(false);
+        window.location.href = "/login";
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, error, login, logout }}>
+        <AuthContext.Provider value={{ user, loading, error, login, logout, isUnauthorized }}>
             {children}
         </AuthContext.Provider>
     );
 };
 
-// ✅ Hook to use authentication context
 export const useAuth = () => useContext(AuthContext);
-

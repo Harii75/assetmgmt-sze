@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 
 const STATUS_OPTIONS = {
@@ -15,8 +14,8 @@ const STATUS_TRANSITIONS = {
   pending: ["reviewing", "in_progress", "rejected"],
   reviewing: ["in_progress", "rejected"],
   in_progress: ["completed", "rejected"],
-  rejected: ["pending", "in_progress", "reviewing", "completed"], // 🔓 Now modifiable
-  completed: ["pending", "in_progress", "reviewing", "rejected"], // 🔓 Now modifiable
+  rejected: ["pending", "in_progress", "reviewing", "completed"],
+  completed: ["pending", "in_progress", "reviewing", "rejected"],
 };
 
 const API_URL = "/api/igenyfelvetel";
@@ -33,19 +32,16 @@ const Igenyek = () => {
     try {
       const response = await fetch(API_URL);
       if (!response.ok) throw new Error("Hiba történt az adatok lekérésekor.");
-
       const data = await response.json();
       setRequests(data);
     } catch (error) {
       console.error("Hiba:", error);
     }
   };
-  
+
   const updateStatus = async (id, newStatus) => {
     const currentStatus = requests.find((r) => r.id === id)?.status || "new";
-  
     if (!STATUS_TRANSITIONS[currentStatus]?.includes(newStatus)) return;
-
     await sendUpdate(id, { status: newStatus });
   };
 
@@ -73,13 +69,13 @@ const Igenyek = () => {
     <div className="p-6 bg-gray-100 min-h-screen">
       <h1 className="text-4xl font-bold text-gray-800 mb-4">Javaslatok</h1>
 
-      <div className="bg-white shadow-md rounded-lg p-4">
-        <div className="grid grid-cols-[3fr_1fr_1fr_1fr_auto] gap-4 p-4 border-b border-gray-300 font-semibold text-gray-700 bg-gray-200 rounded-t-lg">
+      <div className="bg-white shadow-md rounded-lg p-4 overflow-x-auto">
+        <div className="grid grid-cols-[4fr_1fr_1fr_1fr_0.5fr] gap-4 p-4 border-b border-gray-300 font-semibold text-gray-700 bg-gray-200 min-w-[800px]">
           <span>Javaslat neve és leírása</span>
-	  <span>Állapot</span>
+          <span>Állapot</span>
           <span>Kapcsolattartó</span>
           <span>Dátum</span>
-          <span className="text-center">Műveletek</span>
+          <span className="text-center">Művelet</span>
         </div>
 
         {requests.length === 0 ? (
@@ -95,12 +91,12 @@ const Igenyek = () => {
             return (
               <div key={request.id} className="border-b border-gray-300 hover:bg-gray-50 transition">
                 <div
-                  className="grid grid-cols-[3fr_1fr_1fr_1fr_auto] gap-4 items-center p-4 cursor-pointer"
+                  className="grid grid-cols-[4fr_1fr_1fr_1fr_0.5fr] gap-4 items-center p-4 min-w-[800px] cursor-pointer"
                   onClick={() => setExpandedRequest(isExpanded ? null : request.id)}
                 >
                   <div className="flex flex-col">
                     <h2 className="text-lg font-semibold text-gray-800">{request.subject}</h2>
-                    <p className="text-gray-600 text-sm">{request.description}</p>
+                    <p className="text-gray-600 text-sm text-justify">{request.description}</p>
                   </div>
 
                   <div className="w-full" onClick={(e) => e.stopPropagation()}>
@@ -136,9 +132,9 @@ const Igenyek = () => {
 
                   <span className="text-gray-700">{formattedDate}</span>
 
-                  <span className="text-center">
+                  <span className="text-center text-blue-500 text-xl">
                     <span
-                      className={`inline-block transition-transform duration-200 text-blue-500 ${
+                      className={`inline-block transition-transform duration-200 ${
                         isExpanded ? "rotate-180" : ""
                       }`}
                     >
@@ -148,7 +144,7 @@ const Igenyek = () => {
                 </div>
 
                 {isExpanded && (
-                  <div className="grid grid-cols-3 gap-6 p-4 bg-gray-50 rounded-md">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-50 rounded-md">
                     <div className="flex flex-col">
                       <p className="text-gray-600">
                         <strong>Szervezeti egység:</strong> {request.department}
@@ -191,4 +187,3 @@ const Igenyek = () => {
 };
 
 export default Igenyek;
-
