@@ -113,8 +113,8 @@ const HardwareList = ({ category }) => {
       {!loading && !error && (
         <div className="bg-white shadow-sm rounded-md overflow-hidden">
           <table className="w-full text-sm border border-gray-200">
-            <thead className="bg-gray-100 text-gray-600 font-medium">
-              <tr className="border-b border-gray-300">
+            <thead className="bg-gray-100 text-gray-600 font-medium ">
+              <tr className="border-b border-gray-300 ">
                 <th className="p-2 text-left">Azonosító</th>
                 <th className="p-2 text-left">Eszköz neve</th>
                 <th className="p-2 text-left">Kategória</th>
@@ -141,7 +141,7 @@ const HardwareList = ({ category }) => {
                   {expanded === item.id && (
                     <tr>
                       <td colSpan="6" className="p-5 bg-gray-50 border-l-5 border-blue-500 rounded-md shadow-sm text-xs">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 font-bold">
 
                           <div className="space-y-3">
                             <div className="flex items-center">

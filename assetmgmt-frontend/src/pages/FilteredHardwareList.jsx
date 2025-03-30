@@ -128,7 +128,7 @@ const HardwareList = ({ category }) => {
                   </tr>
                   {expanded === item.id && (
                     <tr>
-                      <td colSpan="6" className="p-5 bg-gray-50 border-l-5 border-blue-500 rounded-md shadow-sm text-xs">
+                      <td colSpan="6" className="p-5 bg-gray-50 border-l-5 border-blue-500 rounded-md shadow-sm text-xs font-bold">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           <div className="space-y-3">
                             <div className="flex items-center"><span className="mr-1 text-gray-600 font-medium">Osztály:</span><span className="text-gray-900">{item.custom_fields?.Osztály?.value || "N/A"}</span></div>

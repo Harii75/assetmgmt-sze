@@ -70,118 +70,123 @@ const Igenyek = () => {
       <h1 className="text-4xl font-bold text-gray-800 mb-4">Javaslatok</h1>
 
       <div className="bg-white shadow-md rounded-lg p-4 overflow-x-auto">
-        <div className="grid grid-cols-[4fr_1fr_1fr_1fr_0.5fr] gap-4 p-4 border-b border-gray-300 font-semibold text-gray-700 bg-gray-200 min-w-[800px]">
-          <span>Javaslat neve és leírása</span>
-          <span>Állapot</span>
-          <span>Kapcsolattartó</span>
-          <span>Dátum</span>
-          <span className="text-center">Művelet</span>
-        </div>
+        <table className="min-w-[900px] w-full table-auto">
+          <thead className="bg-gray-200 text-gray-700 font-semibold border-b border-gray-300">
+            <tr>
+              <th className="text-left px-4 py-3 w-[40%]">Javaslat neve és leírása</th>
+              <th className="text-left px-4 py-3">Állapot</th>
+              <th className="text-left px-4 py-3">Kapcsolattartó</th>
+              <th className="text-left px-4 py-3">Dátum</th>
+              <th className="text-center px-4 py-3">Művelet</th>
+            </tr>
+          </thead>
+          <tbody>
+            {requests.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="text-center text-gray-500 py-4">
+                  Nincsenek igények.
+                </td>
+              </tr>
+            ) : (
+              requests.map((request) => {
+                const allowedTransitions = STATUS_TRANSITIONS[request.status] || [];
+                const isExpanded = expandedRequest === request.id;
+                const formattedDate = request.created_at
+                  ? new Date(request.created_at).toLocaleDateString("hu-HU")
+                  : "N/A";
 
-        {requests.length === 0 ? (
-          <p className="text-gray-500 text-lg text-center p-4">Nincsenek igények.</p>
-        ) : (
-          requests.map((request) => {
-            const allowedTransitions = STATUS_TRANSITIONS[request.status] || [];
-            const isExpanded = expandedRequest === request.id;
-            const formattedDate = request.created_at
-              ? new Date(request.created_at).toLocaleDateString("hu-HU")
-              : "N/A";
-
-            return (
-              <div key={request.id} className="border-b border-gray-300 hover:bg-gray-50 transition">
-                <div
-                  className="grid grid-cols-[4fr_1fr_1fr_1fr_0.5fr] gap-4 items-center p-4 min-w-[800px] cursor-pointer"
-                  onClick={() => setExpandedRequest(isExpanded ? null : request.id)}
-                >
-                  <div className="flex flex-col">
-                    <h2 className="text-lg font-semibold text-gray-800">{request.subject}</h2>
-                    <p className="text-gray-600 text-sm text-justify">{request.description}</p>
-                  </div>
-
-                  <div className="w-full" onClick={(e) => e.stopPropagation()}>
-                    {allowedTransitions.length > 0 ? (
-                      <select
-                        value={request.status}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          updateStatus(request.id, e.target.value);
-                        }}
-                        disabled={STATUS_TRANSITIONS[request.status].length === 0}
-                        className={`border rounded-md p-2 w-full text-sm shadow-sm cursor-pointer
-                          ${STATUS_TRANSITIONS[request.status].length === 0 ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-gray-100 text-gray-800"}`}
-                      >
-                        <option value={request.status}>{STATUS_OPTIONS[request.status]}</option>
-                        {STATUS_TRANSITIONS[request.status].map((status) => (
-                          <option key={status} value={status}>
-                            {STATUS_OPTIONS[status]}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <span className="p-2 rounded-md bg-gray-200 text-gray-800 text-sm block text-center">
-                        {STATUS_OPTIONS[request.status]}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col">
-                    <p className="text-gray-700 font-medium">{request.full_name}</p>
-                    <p className="text-blue-500 text-sm">{request.email}</p>
-                  </div>
-
-                  <span className="text-gray-700">{formattedDate}</span>
-
-                  <span className="text-center text-blue-500 text-xl">
-                    <span
-                      className={`inline-block transition-transform duration-200 ${
-                        isExpanded ? "rotate-180" : ""
-                      }`}
+                return (
+                  <>
+                    <tr
+                      key={request.id}
+                      className="border-b border-gray-200 hover:bg-gray-50 transition"
+                      onClick={() => setExpandedRequest(isExpanded ? null : request.id)}
                     >
-                      ▼
-                    </span>
-                  </span>
-                </div>
-
-                {isExpanded && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-50 rounded-md">
-                    <div className="flex flex-col">
-                      <p className="text-gray-600">
-                        <strong>Szervezeti egység:</strong> {request.department}
-                      </p>
-                      <p className="text-gray-600">
-                        <strong>Anyagi forrás:</strong> {request.funding_available === "igen" ? "Van" : "Nincs"}
-                      </p>
-                      <p className="text-gray-600">
-                        <strong>Előzetes egyeztetés:</strong> {request.discussed_internally === "igen" ? "Igen" : "Nem"}
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col">
-                      <p className="text-gray-600">
-                        <strong>Kapcsolódó fejlesztés:</strong>{" "}
-                        {request.related_to_previous === "igen" ? request.previous_development : "N/A"}
-                      </p>
-                      <p className="text-gray-600">
-                        <strong>Ismert szoftver:</strong> {request.known_software === "igen" ? "Igen" : "Nem"}
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col">
-                      <p className="text-gray-600">
-                        <strong>Igénylő:</strong> {request.full_name}
-                      </p>
-                      <p className="text-gray-600">
-                        <strong>Email:</strong> {request.email}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })
-        )}
+                      <td className="px-4 py-3 cursor-pointer">
+                        <div className="font-semibold text-gray-800">{request.subject}</div>
+                        <div className="text-sm text-gray-600 text-justify">{request.description}</div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <select
+                          value={request.status}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            updateStatus(request.id, e.target.value);
+                          }}
+                          disabled={allowedTransitions.length === 0}
+                          className={`border rounded-md p-2 w-full text-sm shadow-sm cursor-pointer
+                            ${allowedTransitions.length === 0
+                              ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                              : "bg-gray-100 text-gray-800"}`}
+                        >
+                          <option value={request.status}>{STATUS_OPTIONS[request.status]}</option>
+                          {allowedTransitions.map((status) => (
+                            <option key={status} value={status}>
+                              {STATUS_OPTIONS[status]}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-gray-700">{request.full_name}</div>
+                        <div className="text-sm text-blue-500">{request.email}</div>
+                      </td>
+                      <td className="px-4 py-3">{formattedDate}</td>
+                      <td className="px-4 py-3 text-center text-xl text-blue-500">
+                        <span className={`inline-block transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}>
+                          ▼
+                        </span>
+                      </td>
+                    </tr>
+                    {isExpanded && (
+                      <tr>
+                        <td colSpan="5" className="bg-gray-50 px-4 py-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                              <p className="text-gray-600">
+                                <strong>Szervezeti egység:</strong> {request.department}
+                              </p>
+                              <p className="text-gray-600">
+                                <strong>Anyagi forrás:</strong>{" "}
+                                {request.funding_available === "igen" ? "Van" : "Nincs"}
+                              </p>
+                              <p className="text-gray-600">
+                                <strong>Előzetes egyeztetés:</strong>{" "}
+                                {request.discussed_internally === "igen" ? "Igen" : "Nem"}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-gray-600">
+                                <strong>Kapcsolódó fejlesztés:</strong>{" "}
+                                {request.related_to_previous === "igen"
+                                  ? request.previous_development
+                                  : "N/A"}
+                              </p>
+                              <p className="text-gray-600">
+                                <strong>Ismert szoftver:</strong>{" "}
+                                {request.known_software === "igen" ? "Igen" : "Nem"}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-gray-600">
+                                <strong>Igénylő:</strong> {request.full_name}
+                              </p>
+                              <p className="text-gray-600">
+                                <strong>Email:</strong> {request.email}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
+                );
+              })
+            )}
+          </tbody>
+        </table>
       </div>
+
     </div>
   );
 };

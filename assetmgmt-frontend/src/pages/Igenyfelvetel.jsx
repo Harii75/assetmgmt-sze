@@ -83,7 +83,7 @@ const Igenyfelvetel = () => {
   return (
     <div className="w-full min-h-screen bg-gray-100 flex justify-center items-center p-10">
       <div className="w-full max-w-[99%] bg-white p-10 rounded-md shadow-md border border-gray-300">
-        <h1 className="text-2xl font-semibold mb-6">Eszközjavaslat űrlap</h1>
+        <h1 className="text-2xl font-semibold mb-6">Informatikai fejlesztési bejelentés űrlap</h1>
 
         {message && (
           <div className={`p-3 mb-4 rounded-md text-center ${message.type === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
